@@ -2,13 +2,11 @@
 This database is a live solar active regions database for solar cycles 23, 24 and 25.
 
 # Overview
-This python code is the automatic detection method of solar active regions (ARs) of our homogeneous database. The method is based on synoptic magnetograms from SOHO/MDI and SDO/HMI and the magnetograms can be got from [Joint Science Operations Center (JSOC)](http://jsoc.stanford.edu/).
-
-According to our calibration, the AR flux of HMI synoptic magnetograms (i.e. ARs after Carrington rotation (CR) 2097(included) ) need to multiply a fator 1.36. 
+This python code is the automatic detection method of solar active regions (ARs) of our homogeneous database. The method is based on morphological operation and region growing. It uses synoptic magnetograms from SOHO/MDI and SDO/HMI and they can be got from [Joint Science Operations Center (JSOC)](http://jsoc.stanford.edu/) freely.
 
 This Python code generates a database of bipolar magnetic regions by automated analysis of the Spaceweather HMI Active Region Patch (SHARP) data. The original data are pulled in automatically using sunpy and are provided by the Helioseismic and Magnetic Imager on Solar Dynamics Observatory.
 
-Full details of the purpose and design of the code are given in the paper A.R. Yeates, How good is the bipolar approximation of active regions for surface flux transport? (Solar Physics 295, 119, 2020).
+Full details of the purpose and design of the code are given in the paper ****.
 
 # Dependencies
 The code is tested with Python 3.8.10 on Spyder 5. The only nonstandard libraries required are astropy.
@@ -37,7 +35,7 @@ By default the code is set up to run for a two-month period, and the correspondi
 
 # Note
 There is also a script update_latest.py for extending an existing database to a later end date.
-
+According to our calibration, the AR flux of HMI synoptic magnetograms (i.e. ARs after Carrington rotation (CR) 2097(included) ) need to multiply a fator 1.36. 
 
 # New options:
 
