@@ -28,6 +28,7 @@ The AR detection modules are in script **ARdetection.py** and they are adaptive 
     # dilating operation kernel in module5
     Kernel4 = np.ones((23, 23))
 The value of parameters is just for MDI magnetograms. For HMI magnetograms, 
+    
     Kernel2 = np.ones((9, 9))
     Thresh = 30
 
