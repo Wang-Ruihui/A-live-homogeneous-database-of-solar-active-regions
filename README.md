@@ -1,4 +1,4 @@
-# An-live-homogeneous-database-of-solar-active-regions
+# A-live-homogeneous-database-of-solar-active-regions
 This database is a live homogeneous solar active regions database for solar cycles 23, 24 and 25 and it provides several basic parameters of AR. Some derived parameters describing the contribution of ARs to the solar surface polar field will be given in future. It can be used to not only the active region long time variation research (space climate) but also solar cycle prediction.
 
 # Overview
