@@ -32,7 +32,7 @@ The value of parameters is just for MDI magnetograms. For HMI magnetograms,
     Kernel2 = np.ones((9, 9))
     Thresh = 30
 
-Using the function, there are two ways to process the magnetograms, single processing and batch processing. The script **Single_processing.py** allows you to process a magnetogram once and gets the ARs of the map and the image after each detection module. The **Batch_processing.py** allows you to process all magnetograms once and gets an array containing properties of all detected ARs. Before running them, you should first set the path of magnetograms and out path in these two scripts. There are four 
+Using the function, there are two ways to process the magnetograms, single processing and batch processing. The script **Single_processing.py** allows you to process a magnetogram once and gets the ARs of the map and the image after each detection module. The **Batch_processing.py** allows you to process all magnetograms once and gets an array containing properties of all detected ARs. Before running them, you should first set the path of magnetograms and out path in these two scripts. 
 
 The **allAR.xlsx** is the final file of all detected ARs in CR 1909 - CR 2265 (1996-05-05 to 2023-01-01). It provides CR number, label, latitude and longitude of each polarity and whole AR, area and flux of each polarity at present. More parameters will be given in future.
 
