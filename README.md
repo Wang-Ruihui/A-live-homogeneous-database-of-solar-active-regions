@@ -12,7 +12,7 @@ The code is tested with Python 3.8.10 on Spyder 5. The only nonstandard library 
 # Usage
 First of all, you should download MDI and HMI synoptic magnetograms (**mdi.synoptic_Mr_96m and hmi.Synoptic_Mr_720s**) from [Joint Science Operations Center (JSOC)](http://jsoc.stanford.edu/). The radial magnetograms are used in our code but line-of-sight (LOS) magnetograms can also be processed.
 
-The AR detection modules are in script **ARdetection.py** and they are adaptive intensity threshold segmentation, morphological closing operation and opening operation, region growing, small regions removal and unipolar regions removal. They can be used by function **ARdetection(img_input, Kernel1, Kernel2, Thresh, Kernel3, Size, Kernel4)**. The meaning and values of function parameters are as follow:
+The AR detection modules are in script **ARdetection.py** and they are adaptive intensity threshold segmentation, morphological closing operation and opening operation, region growing, small regions removal and unipolar regions removal. They can be used by function **ARdetection(img_input, Kernel1, Kernel2, Thresh, Kernel3, Size, Kernel4)**. The meaning and value of function parameters are as follow:
 
     img_input: the synoptic magnetogram input;    
     # closing operation kernel in module2
@@ -27,6 +27,9 @@ The AR detection modules are in script **ARdetection.py** and they are adaptive 
     Size = 351
     # dilating operation kernel in module5
     Kernel4 = np.ones((23, 23))
+The value of parameters is just for MDI magnetograms. For HMI magnetograms, 
+    Kernel2 = np.ones((9, 9))
+    Thresh = 30
 
 Using the function, there are two ways to process the magnetograms, single processing and batch processing. The script **Single_processing.py** allows you to process a magnetogram once and gets the ARs of the map and the image after each detection module. The **Batch_processing.py** allows you to process all magnetograms once and gets an array containing properties of all detected ARs. Before running them, you should first set the path of magnetograms and out path in these two scripts. There are four 
 
