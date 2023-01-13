@@ -1,5 +1,5 @@
 # A-live-homogeneous-database-of-solar-active-regions
-This database is a live homogeneous solar active regions database for solar cycles 23, 24 and 25 and it provides several basic parameters of AR. Some derived parameters describing the contribution of ARs to the solar surface polar field will be given in future. It can be used to not only the active region long time variation research (space climate) but also solar cycle prediction.
+This database is a live homogeneous solar active regions database for solar cycles 23, 24 and 25 and it provides several basic parameters of AR at present. Some derived parameters describing the contribution of ARs to the solar surface polar field will be given in future. It can be used to not only the active region long time variation research (space climate) but also solar cycle prediction.
 
 # Overview
 This python code is the automatic detection method of solar active regions (ARs) of the homogeneous database. The method is based on morphological operation and region growing. It uses synoptic magnetograms from SOHO/MDI and SDO/HMI and they can be got from [Joint Science Operations Center (JSOC)](http://jsoc.stanford.edu/) freely. The detected ARs are given in **allAR.xlsx** file. The time range of ARs is from Carrington rotation (CR) 1909 to CR 2265 at present. ARs in new CR will be included continually.
@@ -12,7 +12,7 @@ The code is tested with Python 3.8.10 on Spyder 5. The only nonstandard library 
 # Usage
 First of all, you should download MDI and HMI synoptic magnetograms (**mdi.synoptic_Mr_96m and hmi.Synoptic_Mr_720s**) from [Joint Science Operations Center (JSOC)](http://jsoc.stanford.edu/). The radial magnetograms are used in our code but line-of-sight (LOS) magnetograms can also be processed.
 
-The AR detection modules are in script **ARdetection.py** and they are adaptive intensity threshold segmentation, morphological closing operation and opening operation, region growing, small regions removal and unipolar regions removal. They can be used by function **ARdetection(img_input, Kernel1, Kernel2, Thresh, Kernel3, Size, Kernel4)**. The meaning and value of function parameters are as follow:
+**ARdetection.py** contains the five AR detection modules, adaptive intensity threshold segmentation, morphological closing operation and opening operation, region growing, small regions removal and unipolar regions removal. They can be used by function **ARdetection(img_input, Kernel1, Kernel2, Thresh, Kernel3, Size, Kernel4)**. The meaning and value of function parameters are as follow:
 
     img_input: the synoptic magnetogram input;    
     # closing operation kernel in module2
@@ -27,7 +27,7 @@ The AR detection modules are in script **ARdetection.py** and they are adaptive 
     Size = 351
     # dilating operation kernel in module5
     Kernel4 = np.ones((23, 23))
-The value of parameters is just for MDI magnetograms. For HMI magnetograms, 
+The value of *Kernel2* and *Thresh* is just for MDI magnetograms. For HMI magnetograms, 
     
     Kernel2 = np.ones((9, 9))
     Thresh = 30
@@ -36,7 +36,7 @@ Using the function, there are two ways to process the magnetograms, single proce
 
 The **ARparameters.py** describes the methods to calculate the location, area and flux of each detected AR.
 
-The **allAR.xlsx** is the final file of all detected ARs in CR 1909 - CR 2265 (1996-05-05 to 2023-01-01). It provides CR number, label, latitude and longitude of each polarity and whole AR, area and flux of each polarity at present. More parameters will be given in future.
+The **allAR.xlsx** is the final file of all detected ARs in CR 1909 - CR 2265 (1996-05-05 to 2023-01-01). It provides CR number, label, latitude and longitude of each polarity and whole AR, area and flux of each polarity at present. More parameters will be given in future. The following picture is a part of the file.
 
 ![image](https://user-images.githubusercontent.com/110174507/212001212-009552ff-1e3b-4011-b147-97a5a33fc4c6.png)
 
