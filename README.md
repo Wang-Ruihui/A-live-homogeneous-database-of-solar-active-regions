@@ -2,7 +2,7 @@
 This database is a live homogeneous solar active regions database for solar cycles 23, 24 and 25 and it provides several basic parameters of AR at present. Some derived parameters describing the contribution of ARs to the solar surface polar field will be given in future. It can be used to not only the active region long time variation research (space climate) but also solar cycle prediction.
 
 # Overview
-This python code is the automatic detection method of solar active regions (ARs) of the homogeneous database. The method is based on morphological operation and region growing. It uses synoptic magnetograms from SOHO/MDI and SDO/HMI and they can be got from [Joint Science Operations Center (JSOC)](http://jsoc.stanford.edu/) freely. The detected ARs are given in **allAR.xlsx** file. The time range of ARs is from Carrington rotation (CR) 1909 to CR 2265 at present. ARs in new CR will be included continually.
+This python code is the automatic detection method of solar active regions (ARs) of the homogeneous database. The method is based on morphological operation and region growing. It uses synoptic magnetograms from SOHO/MDI and SDO/HMI and they can be got from [Joint Science Operations Center (JSOC)](http://jsoc.stanford.edu/) freely. The detected ARs are given in **allAR.xlsx** file. The time range of ARs is from Carrington rotation (CR) 1909 to CR 2271 at present. ARs in new CR will be included continually.
 
 Full details of the purpose and design of the code are given in the paper ****.
 
