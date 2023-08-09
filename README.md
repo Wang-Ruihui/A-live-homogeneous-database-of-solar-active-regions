@@ -32,7 +32,7 @@ The value of *Kernel2* and *Thresh* is just for MDI magnetograms. For HMI magnet
     Kernel2 = np.ones((9, 9))
     Thresh = 30
 
-Using the function, there are two ways to process the magnetograms, single processing and batch processing. The script **Single_processing.py** allows you to process a magnetogram once and gets the ARs of the map and the image after each detection module. The **Batch_processing.py** allows you to process all magnetograms once and gets an array containing properties of all detected ARs. Before running them, you should first set the path of magnetograms and out path in these two scripts. 
+Using the function, there are two ways to process the magnetograms, single processing and batch processing. The script **Single_processing.py** allows you to process a magnetogram once and gets the ARs of the map and the image after each detection module. The **Batch_processing.py** allows you to process all magnetograms once and gets an array containing properties of all detected ARs. Before running them, you should first set the path of magnetograms and output path in these two scripts. 
 
 The **ARparameters.py** describes the methods to calculate the location, area, and flux of each detected AR.
 
