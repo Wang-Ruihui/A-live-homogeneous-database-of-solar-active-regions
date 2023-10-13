@@ -1,11 +1,10 @@
 # A-live-homogeneous-database-of-solar-active-regions
-This database is a live homogeneous solar active regions database for solar cycles 23, 24, and 25. It provides several basic parameters of AR at present. Some derived parameters describing the contribution of ARs to the solar surface polar field will be given in the future. It can be used for not only the active region long-time variation research (space climate) but also solar cycle prediction.
+This database is a live homogeneous database of solar active regions for solar cycles 23, 24, and 25. It provides several basic parameters of AR at present. More parameters describing the contribution of ARs to the solar surface polar field will be given in the future. It can be used for not only the active region long-time variation research (space climate) but also solar cycle prediction.
 
 # Overview
 This python code is the automatic detection method of solar active regions (ARs) of the homogeneous database. The method is based on morphological operation and region growing. It uses synoptic magnetograms from SOHO/MDI and SDO/HMI and they can be obtained from [Joint Science Operations Center (JSOC)](http://jsoc.stanford.edu/) freely. The detected ARs are given in **allAR.xlsx** file. The time range of ARs is from Carrington rotation (CR) 1909 to CR 2271 at present. ARs in the new CR will be included continually.
 
-Full details of the purpose and design of the code are given in the paper [Ruihui Wang, Jie Jiang, Yukun Luo, Towards a live homogeneous database of solar active regions based on SOHO/MDI and SDO/HMI
-synoptic magnetograms. I. Automatic detection and calibration, accepted by APJS](https://arxiv.org/abs/2308.06914).
+Full details of the purpose and design of the code are given in the paper [Ruihui Wang, Jie Jiang, Yukun Luo, Toward a live homogeneous database of solar active regions based on SOHO/MDI and SDO/HMI synoptic magnetograms. I. Automatic detection and calibration](https://doi.org/10.3847/1538-4365/acef1b).
 
 # Dependencies
 The code is tested with Python 3.8.10 on Spyder 5. The only nonstandard library required is astropy. The image processing in our code is based on opencv 4.5.2.
