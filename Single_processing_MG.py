@@ -40,7 +40,6 @@ for i in range(number):
 lamdr = 5
 fdf = FDF(img_label, img_input, lamdr)
 idf = IDF(img_label, img_input)
-fdfrs = FDFrs(flux, locat[4, :], 1, lamdr)
 idfbmr, fdfbmr = FDFBMR(flux, locat, lamdr)
 # ------------------------------------------------------------------------------
 #
