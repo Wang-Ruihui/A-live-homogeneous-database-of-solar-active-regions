@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import cv2 as cv
 import scipy
 from ARdetection import ARdetection, imshow, Get_ARi
-from ARparameters import ARArea, ARFlux, ARLocat, Distance, FDF, IDF, FDFrs, FDFBMR
+from ARparameters import ARArea, ARFlux, ARLocat, Distance, FDF, IDF, FDFBMR
 # ------------------------------------------------------------------------------
 # File: image needs processing; File_old:image from the last CR
 File = 'D:/python program/活动区识别/SynopMr/SynopMr 1MDI/mdi.synoptic_Mr_96m.1976.data.fits'
