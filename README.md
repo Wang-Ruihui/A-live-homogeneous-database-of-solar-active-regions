@@ -1,12 +1,15 @@
 # A-live-homogeneous-database-of-solar-active-regions (repeat AR removal)
-In this branch, we provide the AR detection program with a repeat-AR-removal module and the updated AR database. Also, parameters for solar cycle variabilities, including $D_i$ , $D_f$ and their BMR approximation $D_i^B$ and $D_f^B$, are provided in the database: allAR_ReARRem.xlsx
 
 This database is a live homogeneous database of solar active regions for solar cycles 23, 24, and 25. It provides several basic parameters of AR at present. More parameters describing the contribution of ARs to the solar surface polar field will be given in the future. It can be used for not only the active region long-time variation research (space climate) but also solar cycle prediction.
+
+**In this branch, we provide the AR detection program with a repeat-AR-removal module and the updated AR database. Also, parameters for solar cycle variabilities, including $D_i$ , $D_f$ and their BMR approximation $D_i^B$ and $D_f^B$, are provided in the database: allAR2.xlsx**
 
 # Overview
 This python code is the automatic detection method of solar active regions (ARs) of the homogeneous database. The method is based on morphological operation and region growing. It uses synoptic magnetograms from SOHO/MDI and SDO/HMI and they can be obtained from [Joint Science Operations Center (JSOC)](http://jsoc.stanford.edu/) freely. The detected ARs are given in **allAR.xlsx** file. The time range of ARs is from Carrington rotation (CR) 1909 to CR 2271 at present. ARs in the new CR will be included continually.
 
 Full details of the purpose and design of the code are given in the paper [Ruihui Wang, Jie Jiang, Yukun Luo, Toward a live homogeneous database of solar active regions based on SOHO/MDI and SDO/HMI synoptic magnetograms. I. Automatic detection and calibration (APJS)](https://doi.org/10.3847/1538-4365/acef1b).
+
+Details for removing the repeat ARs and properties of dipole fields will be given in a future paper.
 
 # Dependencies
 The code is tested with Python 3.8.10 on Spyder 5. The only nonstandard library required is astropy. The image processing in our code is based on opencv 4.5.2.
@@ -38,7 +41,7 @@ Using the function, there are two ways to process the magnetograms, single proce
 
 The **ARparameters.py** describes the methods to calculate the location, area, and flux of each detected AR.
 
-The **allAR_ReARRem.xlsx** is the final file of all detected ARs in CR 1909 - CR 2278 (1996-05-05 to 2023-12-21). It provides the CR number, label, latitude and longitude of each polarity and the whole AR, area, flux of each polarity and dipole fields,$D_i$, $D_f$, $D_i^B$, and $D_f^B$. More parameters will be given in the future. The following picture is a part of the file.
+The **allAR2.xlsx** is the final file of all detected ARs in CR 1909 - CR 2278 (1996-05-05 to 2023-12-21). It provides the CR number, label, latitude and longitude of each polarity and the whole AR, area, flux of each polarity and dipole fields,$D_i$, $D_f$, $D_i^B$, and $D_f^B$. More parameters will be given in the future. The following picture is a part of the file.
 
 ![image](https://github.com/Wang-Ruihui/A-live-homogeneous-database-of-solar-active-regions/assets/110174507/9e475234-7f05-4748-803d-db4f6f3a8be2)
 
