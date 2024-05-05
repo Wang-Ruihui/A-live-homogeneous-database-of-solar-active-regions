@@ -1,7 +1,6 @@
 # A-live-homogeneous-database-of-solar-active-regions (repeat AR removal)
 
-This database is a live homogeneous database of solar active regions for solar cycles 23, 24, and 25. It provides several basic parameters of AR and parameters for solar cycle variabilities. It can be used for the active region long-time variation research and understanding and prediction of the
-solar cycle.
+This database is a live homogeneous database of solar active regions for solar cycles 23, 24, and 25. It provides several basic parameters of AR and parameters for solar cycle variabilities. It can be used for the active region long-time variation research and understanding and prediction of the solar cycle.
 
 **In this branch, we provide the AR detection program with a repeat-AR-removal module. We also provide parameters for solar cycle variabilities, including $D_i$, $D_f$, and their BMR approximation $D_i^B$ and $D_f^B$, in the database: allAR2.xlsx. Although repeat ARs should be removed when researching their impact on solar cycles, they are usually kept in the AR database which only concerns ARs themselves. Therefore, the database-v1.0 may be more proper in some research.**
 
