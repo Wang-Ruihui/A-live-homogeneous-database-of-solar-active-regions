@@ -15,8 +15,8 @@ from ARdetection import Get_ARP, Get_ARi
 
 def data_missing(file):
     """
-    determine thether there is missing value in the file.
-    if there is nan around the equator in the file, then we think is data missing.
+    determine whether there is missing value in the file.
+    if there is nan around the equator in the file, we think the file is data missing.
 
     Parameters
     ----------

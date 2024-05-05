@@ -42,7 +42,48 @@ fdf = FDF(img_label, img_input, lamdr)
 idf = IDF(img_label, img_input)
 idfbmr, fdfbmr = FDFBMR(flux, locat, lamdr)
 # ------------------------------------------------------------------------------
-#
+'''
+# image after each module
+plt.rc('font', family='Times New Roman')
+plt.rcParams["font.weight"] = 'bold'
+plt.rcParams["axes.labelweight"] = 'bold'
+plt.rcParams["mathtext.fontset"] = 'stix'
+
+Y, X = img_input.shape
+nl = ['(a)', '(b)', '(c)', '(d)', '(e)', '(f)', '(g)','(h)']
+
+fig, axes = plt.subplots(8, 1,  figsize=(6, 9.5))
+img = [img_input, module1, module2,
+       module3, module4,module42, module5, result]
+# 需要将子图坐标轴标度去除
+for i in range(len(axes.flat)):
+    ax = axes.flat[i]
+    imshow(ax, img[i])
+    ax.text(3700, 600, nl[i], fontsize=24)
+    if i == 0:
+        ax.contour(img_border, colors='darkorange')
+
+axes[0].tick_params(length=4, width=1, labelsize=18)
+axes[0].set_xticks([])
+axes[0].set_yticks(np.linspace(0, Y, 3))
+axes[0].set_yticklabels(
+    ['sin(-60$^\circ$)', '0', 'sin(60$^\circ$)'], fontsize=14)
+axes[6].tick_params(length=4, width=1, labelsize=18)
+axes[6].set_xticks(np.linspace(0, X, 5))
+axes[6].set_xticklabels(['0', '90', '180', '270', '360'])
+axes[6].set_yticks(np.linspace(0, Y, 3))
+axes[6].set_yticklabels(
+    ['sin(-60$^\circ$)', '0', 'sin(60$^\circ$)'], fontsize=14)
+# 去除坐标轴
+for i in range(1, len(axes.flat)-1):
+    ax = axes.flat[i]
+    ax.set_yticks([])
+    ax.set_xticks([])
+
+plt.tight_layout()
+plt.subplots_adjust(wspace=0.2, hspace=0)
+'''
+# the final image
 plt.rc('font', family='Times New Roman')
 plt.rcParams["font.weight"] = 'bold'
 plt.rcParams["axes.labelweight"] = 'bold'
