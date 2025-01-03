@@ -67,7 +67,7 @@ plt.rcParams.update({
 })
 
 Y, X = img_input.shape
-# 识别后图像
+
 font1 = {'family': 'Times New Roman',
          'weight': 'bold',
          'size': 24,
@@ -91,6 +91,5 @@ lon1 = lon*10
 for i in range(number):
     ax.text(lon1[i]+80, lat1[i], i+1, fontsize=18)
 
-# 图像紧凑分布，去除周围空白和图像间隔
 plt.tight_layout()
 plt.subplots_adjust(wspace=0, hspace=0)
