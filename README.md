@@ -25,16 +25,25 @@ To use the codes, first of all, you should download MDI and HMI synoptic magneto
 
 We also provide two functions in the file to process a map, Get_ARi to get the detection image, and Get_ARP to get parameters of detected ARs.
 
-Using the function, there are two ways to process the magnetograms, single processing and batch processing. The script **Single_processing.py** allows you to process a magnetogram once and gets the ARs of the map and the image after each detection module. The **Batch_processing.py** allows you to process all magnetograms once and gets an array containing properties of all detected ARs. Before running them, you should first set the path of magnetograms and output path in these two scripts. 
+**ARparameters.py** describes the methods to calculate the parameters of each detected AR, such as area, flux, and dipole fields.
 
-The **ARparameters.py** describes the methods to calculate the parameters of each detected AR, such as area, flux, and dipole fields.
+**Single_processing.py** allows you to process a magnetogram once and gets the detected ARs labeled on the map.
 
-The **allAR.xlsx** is the final file of all detected ARs in CR 1909 - CR 2271 (1996-05-05 to 2023-06-14). It provides the CR number, label, latitude and longitude of each polarity and the whole AR, area, and flux of each polarity at present. More parameters will be given in the future. The following picture is a part of the file.
+**Batch_processing_MG_param.py** allows you to process all magnetograms once and gets an array containing properties of all detected ARs. 
 
-![image](https://user-images.githubusercontent.com/110174507/212001212-009552ff-1e3b-4011-b147-97a5a33fc4c6.png)
+**database_allAR.xlsx** is the file of all detected ARs in CR 1909 - CR 2290 (1996-05 to 2024-11). It provides the CR number, label, the latitude and longitude of the flux-weighted centroid for both polarities and the entire AR, the area, the flux of each polarity, the maximum magnetic field of the entire AR, the dipole fields, and dipole fields with BMR approximations at present. More parameters will be given in the future if necessary. The following picture is a part of the file.
+![image](https://github.com/user-attachments/assets/a385010c-31e1-47e3-8e86-9b03d79478bd)
+
+**database_remove_repeat_AR.xlsx** is the same as **database_allAR.xlsx**, but repeat ARs are removed from this file.
+
+**OutputARs.py**  is used to output the maps of detected ARs. The AR maps are named with their emerging time from the setted time0 (CR 1912, 1996-07-25 21:35:44.193, can be changed). ARs in the same longitude are on the same map. ARs on the map border are judged with a scriter flux balance limitation.
+
+**Batch_processing_MG_outputAR.py** is used to batch output the maps of detected ARs for all synotic magnetograms.
+
+**ARmaps.zip** is the outputted low-resolution (180*360) maps of detected AR. The AR maps are named with their emerging time from the setted time0 (CR 1912, 1996-07-25 21:35:44.193)
 
 # Note
-According to our calibration, the fluxes of ARs from HMI synoptic magnetograms (i.e. ARs after CR 2097(included)) need to be multiplied with a factor of 1.36. 
+According to our calibration, the fluxes, Bmax, and dipole field of ARs from HMI synoptic magnetograms (i.e. ARs after CR 2097(included)) need to be multiplied with a factor of 1.36. 
 
 # Acknowledgements
 The database is supported by SCOSTEP/PRESTO 2024 database grant, the National Key R&D Program of China No. 2022YFF0503800, the National Natural Science Foundation of China Nos. 12173005 and 12350004.
