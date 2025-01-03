@@ -11,7 +11,6 @@ import cv2 as cv
 import os
 from sunpy.coordinates.sun import carrington_rotation_time
 from ARdetection import Get_ARi
-from Functions import SinlatToLat
 from ARparameters import ARLocat
 
 
@@ -39,6 +38,27 @@ def FluxBalanceL(ar):
     return ar
 
 
+def SinlatToLat(imgSinlat):
+    # Coordinate transformation: from sinlat to lat
+
+    M, N = imgSinlat.shape
+    imgLat = np.zeros((M, N))
+    # iteration of equal latitude array
+    for i in range(M):
+        lat = ((i+0.5)/(M)*180-90)/180*np.pi
+        indexlat = (np.sin(lat)+1)/2*(M)
+
+        # linear interpolation
+        b = int(indexlat)
+        c = indexlat-b
+        if b < M-1:
+            imgLat[i, :] = (1-c)*imgSinlat[b, :] + c*imgSinlat[b+1, :]
+        else:
+            imgLat[i, :] = imgSinlat[b, :]
+
+    return imgLat
+
+
 def OutputARs(directory_path, img_org, img_label, size, CR, CR0, arlat=None, latrange=[-90, 90]):
     """
     output the magnetograms of detected ARs in the given size
@@ -51,8 +71,9 @@ def OutputARs(directory_path, img_org, img_label, size, CR, CR0, arlat=None, lat
         detected AR label of img
     sizes:array,eg. (360,180)
         size of output image
-    CR: the carring rotation of map, used to give the time of AR
+    CR: the CR of map, used to give the time of AR
     CR0: the initial time to give the time of AR
+    arlat: The lat list of ARs
     latrange: the lat range of AR that want to output
 
     Returns
@@ -60,6 +81,7 @@ def OutputARs(directory_path, img_org, img_label, size, CR, CR0, arlat=None, lat
     None.
 
     """
+    # AR number
     nar = np.max(img_label)
     t0 = carrington_rotation_time(CR0)
     t1 = carrington_rotation_time(CR)
@@ -89,6 +111,7 @@ def OutputARs(directory_path, img_org, img_label, size, CR, CR0, arlat=None, lat
             if arlat[i] < latrange[0] or arlat[i] > latrange[1]:
                 continue
 
+        # set a stricter flux balance limitation for ARs on the border
         if lon > 350 or lon < 10:
             pos = ar[ar > 0]
             neg = ar[ar < 0]
@@ -111,7 +134,7 @@ def OutputARs(directory_path, img_org, img_label, size, CR, CR0, arlat=None, lat
         # restore the latitude range to +-90
         arSmt2 = np.zeros((row, col))
         arSmt2[index_lat60:(row-index_lat60)] = arSmt
-        # change sinlat to lat
+        # Coordinate transformation: from sinlat to lat
         arSmt_lat = SinlatToLat(arSmt2)
 
         arResized = cv.resize(arSmt_lat, size, interpolation=cv.INTER_LINEAR)
@@ -120,7 +143,6 @@ def OutputARs(directory_path, img_org, img_label, size, CR, CR0, arlat=None, lat
         arResized = FluxBalanceL(arResized)
 
         fname = 'day_' + DeltaDay + '.txt'
-        # directory_path = 'D:\\WorkingProgram\\sftprograms\\ARmaps\\all\\'
         file = directory_path + fname
         if os.path.exists(file):
             arResized = arResized + np.loadtxt(file)
@@ -150,7 +172,7 @@ if __name__ == '__main__':
 
     ar_sameday = []
     ar_border = []
-    directory_path = 'D:\\WorkingProgram\\sftprograms\\ARmaps\\Remove_NotEmerge_Repeat\\dilate19\\21412160\\'
+    directory_path = 'D:\\test\\'
 
     #File_next = 'D:/python program/活动区识别/SynopMr/SynopMr 1MDI/mdi.synoptic_Mr_96m.2077.data.fits'
     for i in range(2141, 2160+1):
