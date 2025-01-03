@@ -4,9 +4,9 @@
 # Overview
 This is `An Active Region Database for Solar Cycle Variability and Prediction', developed by **Ruihui Wang, Jie Jiang, and Yukun Luo**, Beihang University, China. 
 
-We offer two versions of the database: one includes all detected ARs (**database_allAR.xlsx**), and the other excludes repeat ARs (**database_remove_repeat_AR.xlsx**). Both versions contain the same parameters, including basic parameters and parameters for solar cycle variability (dipole fields). However, caution should be exercised when using dipole field data due to the repeated records of some long-lived ARs.
+We offer two versions of the database: one includes all detected ARs (**database_allAR.xlsx**), and the other excludes repeat ARs (**database_remove_repeat_AR.xlsx**). Both versions contain the same parameters, including basic parameters and those related to solar cycle variability (dipole fields). However, caution should be taken when using the dipole field data from _database_allAR.xlsx_, as some long-lived ARs are recorded multiple times.
 
-The temporal coverage of the ARs spans from Carrington Rotations (CRs) 1909-2290, corresponding to the period from May 1996 to November 2024, covering cycles 23, 24, and 25. Data from new CRs will be continuously added.
+The database covers ARs from Carrington Rotations (CRs) 1909 to 2290, corresponding to the period from May 1996 to November 2024, encompassing cycles 23, 24, and 25. Data from subsequent CRs will be continuously added.
 
 For a detailed explanation of the purpose and design of the database, please refer to the following publications:
 
@@ -14,33 +14,34 @@ For a detailed explanation of the purpose and design of the database, please ref
 2. Ruihui Wang, Jie Jiang, Yukun Luo, "II. Parameters for Solar Cycle Variability," ApJ, https://doi.org/10.3847/1538-4357/ad5b5f.
 
 # Dependencies
-The code is tested with Python 3.8.10 on Spyder 5. The nonstandard libraries required are astropy, and sunpy. The image processing in our code is based on opencv 4.5.5.
+The code has been tested with Python 3.8.10 on Spyder 5. The nonstandard libraries required are _astropy_ and _sunpy._ Image processing in the code relies on _opencv_ version 4.5.5
 
 # Usage
-These python codes including the automatic detection method of solar active regions (ARs), and the codes to create the database. The detection method is based on morphological operation and region growing. We use synoptic magnetograms from SOHO/MDI and SDO/HMI, which an be obtained from [Joint Science Operations Center (JSOC)](http://jsoc.stanford.edu/) freely. 
+These Python codes include the automatic detection method for solar active regions (ARs) and the programs for creating the database. The detection method is based on morphological operations and region growing. We use synoptic magnetograms from SOHO/MDI and SDO/HMI, which can be freely obtained from the [Joint Science Operations Center (JSOC)](http://jsoc.stanford.edu/).
 
-To use the codes, first of all, you should download MDI and HMI synoptic magnetograms (**mdi.synoptic_Mr_96m and hmi.Synoptic_Mr_720s**) from [Joint Science Operations Center (JSOC)](http://jsoc.stanford.edu/). The radial magnetograms are used in our code but line-of-sight (LOS) magnetograms can also be processed with proper changes on the detection parameters.
+To use the codes, you first need to download MDI and HMI synoptic magnetograms (_mdi.synoptic_Mr_96m and hmi.Synoptic_Mr_720s_) from JSOC. The radial magnetograms are used in our code, but line-of-sight (LOS) magnetograms can also be processed with appropriate adjustments to the detection parameters
 
-**ARdetection.py** contains the AR detection methods, which includes the origional detection method (**ARdetection_org**) and new method with repeat-AR-removal (**ARdetection**). Our detection method contains five AR detection modules, including adaptive intensity threshold segmentation, morphological closing operation and opening operation, region growing, small regions removal, and unipolar regions removal. The repeat-AR-removal module is added between modules small regions removal and unipolar regions removal in function ARdetection.
 
-We also provide two functions in the file to process a map, Get_ARi to get the detection image, and Get_ARP to get parameters of detected ARs.
+**ARdetection.py** contains the AR detection methods, including the original detection method (**ARdetection_org**) and the updated method with repeat-AR-removal (**ARdetection**). Our detection processmethod consists of five modules: adaptive intensity threshold segmentation, morphological closing and opening operations, region growing, small region removal, and unipolar region removal. The repeat-AR-removal module is integrated between the small region removal and unipolar region removal steps in the **ARdetection** function.
+
+Additionally, we provide two functions in the file to process a map: **Get_ARi**, which generates the detection image, and **Get_ARP**, which returns the parameters of the detected ARs.
 
 **ARparameters.py** describes the methods to calculate the parameters of each detected AR, such as area, flux, and dipole fields.
 
-**Single_processing.py** allows you to process a magnetogram once and gets the detected ARs labeled on the map.
+**Single_processing_MG.py** enables you to process a single magnetogram and obtain the detected ARs labeled on the map.
 
-**Batch_processing_MG_param.py** allows you to process all magnetograms once and gets an array containing properties of all detected ARs. 
+**Batch_processing_MG_param.py** enables you to processo all magnetograms at once and generates an array containing the parameters of all detected ARs.
 
 **database_allAR.xlsx** is the file of all detected ARs in CR 1909 - CR 2290 (1996-05 to 2024-11). It provides the CR number, label, the latitude and longitude of the flux-weighted centroid for both polarities and the entire AR, the area, the flux of each polarity, the maximum magnetic field of the entire AR, the dipole fields, and dipole fields with BMR approximations at present. More parameters will be given in the future if necessary. The following picture is a part of the file.
 ![image](https://github.com/user-attachments/assets/a385010c-31e1-47e3-8e86-9b03d79478bd)
 
-**database_remove_repeat_AR.xlsx** is the same as **database_allAR.xlsx**, but repeat ARs are removed from this file.
+**database_remove_repeat_AR.xlsx** is the same as **database_allAR.xlsx**, except that repeat ARs have been removed from this file.
 
-**OutputARs.py**  is used to output the maps of detected ARs. The AR maps are named with their emerging time from the setted time0 (CR 1912, 1996-07-25 21:35:44.193, can be changed). ARs in the same longitude are on the same map. ARs on the map border are judged with a scriter flux balance limitation.
+**OutputARs.py** is used to generate maps of the detected ARs. The AR maps are named according to their emergence time relative to the specified time0 (default: CR 1912, 1996-07-25 21:35:44.193, which can be changed). ARs located at the same longitude are placed on the same map. ARs at the map border are evaluated using a stricter flux balance limitation.
 
-**Batch_processing_MG_outputAR.py** is used to batch output the maps of detected ARs for all synotic magnetograms.
+**Batch_processing_MG_outputAR.py** is used to batch output the detected ARs for all synotic magnetograms.
 
-**ARmaps.zip** is the outputted low-resolution (180*360) maps of detected AR. The AR maps are named with their emerging time from the setted time0 (CR 1912, 1996-07-25 21:35:44.193)
+**ARmaps.zip** is the outputted low-resolution (180*360) maps of detected AR.  The AR maps are named according to their emergence time relative to the specified time0 (default: CR 1912, 1996-07-25 21:35:44.193). 
 
 # Note
 According to our calibration, the fluxes, Bmax, and dipole field of ARs from HMI synoptic magnetograms (i.e. ARs after CR 2097(included)) need to be multiplied with a factor of 1.36. 
