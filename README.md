@@ -1,21 +1,26 @@
-# A-live-homogeneous-database-of-solar-active-regions
-This is `An Active Region Database for Solar Cycle Variability and Prediction', developed by Ruihui Wang, Jie Jiang, and Yukun Luo. In this version, we provide comprehensive data on all detected ARs. The database provides several basic parameters and parameters for solar cycle variability (dipole fields). However, caution should be exercised when using dipole field data due to the repeated records of some long-lived ARs. The temporal coverage of the ARs spans from Carrington Rotation (CR) 1909 to CR 2290, corresponding to the period from May 1996 to November 2024, covering cycles 23, 24, and 25. Data from new CRs will be continuously added.
+# An Active Region Database for Solar Cycle Variability and Prediction 
+# (formerly a live homogeneous database of solar active regions)
+
+# Overview
+This is `An Active Region Database for Solar Cycle Variability and Prediction', developed by Ruihui Wang, Jie Jiang, and Yukun Luo. We offer two versions of the database: one includes all detected ARs (**database_allAR.xlsx**), and the other excludes repeat ARs (**database_remove_repeat_AR.xlsx**). Both versions contain the same parameters, including basic parameters and parameters for solar cycle variability (dipole fields). However, caution should be exercised when using dipole field data due to the repeated records of some long-lived ARs.
+
+The temporal coverage of the ARs spans from Carrington Rotations (CRs) 1909-2290, corresponding to the period from May 1996 to November 2024, covering cycles 23, 24, and 25. Data from new CRs will be continuously added.
 
 For a detailed explanation of the purpose and design of the database, please refer to the following publications:
-    "Toward a Live Homogeneous Database of Solar Active Regions Based on SOHO/MDI and SDO/HMI Synoptic Magnetograms. I. Automatic Detection and Calibration," ApJS, https://doi.org/10.3847/1538-4365/acef1b.
-    "II. Parameters for Solar Cycle Variability," ApJ, https://doi.org/10.3847/1538-4357/ad5b5f.
+
+1. "Toward a Live Homogeneous Database of Solar Active Regions Based on SOHO/MDI and SDO/HMI Synoptic Magnetograms. I. Automatic Detection and Calibration," ApJS, https://doi.org/10.3847/1538-4365/acef1b.
+2. "II. Parameters for Solar Cycle Variability," ApJ, https://doi.org/10.3847/1538-4357/ad5b5f.
     
-We also provide an other version of the database where repeated ARs are removed in the website.
+We offer two versions of the database: one includes all detected ARs (**database_allAR.xlsx**), and the other excludes repeat ARs (**database_remove_repeat_AR.xlsx**). However, caution should be exercised when using dipole field data due to the repeated records of some long-lived ARs. 
 
 This database is a live homogeneous database of solar active regions for solar cycles 23, 24, and 25.  It can be used for not only the active region long-time variation research (space climate) but also solar cycle prediction.
 
-# Overview
-This python code is the automatic detection method of solar active regions (ARs) of the homogeneous database. The method is based on morphological operation and region growing. It uses synoptic magnetograms from SOHO/MDI and SDO/HMI and they can be obtained from [Joint Science Operations Center (JSOC)](http://jsoc.stanford.edu/) freely. The detected ARs are given in **allAR.xlsx** file. The time range of ARs is from Carrington rotation (CR) 1909 to CR 2271 at present. ARs in the new CR will be included continually.
+This python code is the automatic detection method of solar active regions (ARs) of the homogeneous database. The method is based on morphological operation and region growing. It uses synoptic magnetograms from SOHO/MDI and SDO/HMI, which an be obtained from [Joint Science Operations Center (JSOC)](http://jsoc.stanford.edu/) freely. The detected ARs are given in **allAR.xlsx** file. The time range of ARs is from Carrington rotation (CR) 1909 to CR 2271 at present. ARs in the new CR will be included continually.
 
 Full details of the purpose and design of the code are given in the paper [Ruihui Wang, Jie Jiang, Yukun Luo, Toward a live homogeneous database of solar active regions based on SOHO/MDI and SDO/HMI synoptic magnetograms. I. Automatic detection and calibration (APJS)](https://doi.org/10.3847/1538-4365/acef1b).
 
 # Dependencies
-The code is tested with Python 3.8.10 on Spyder 5. The only nonstandard library required is astropy. The image processing in our code is based on opencv 4.5.2.
+The code is tested with Python 3.8.10 on Spyder 5. The nonstandard libraries required are astropy, and sunpy. The image processing in our code is based on opencV 4.5.5.
 
 # Usage
 First of all, you should download MDI and HMI synoptic magnetograms (**mdi.synoptic_Mr_96m and hmi.Synoptic_Mr_720s**) from [Joint Science Operations Center (JSOC)](http://jsoc.stanford.edu/). The radial magnetograms are used in our code but line-of-sight (LOS) magnetograms can also be processed with proper changes to the detection parameters.
