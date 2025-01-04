@@ -24,6 +24,8 @@ To use the codes, you first need to download MDI and HMI synoptic magnetograms (
 
 **ARdetection.py** contains the AR detection methods, including the original detection method (**ARdetection_org**) and the updated method with repeat-AR-removal (**ARdetection**). Our detection processmethod consists of five modules: adaptive intensity threshold segmentation, morphological closing and opening operations, region growing, small region removal, and unipolar region removal. The repeat-AR-removal module is integrated between the small region removal and unipolar region removal steps in the **ARdetection** function.
 
+We change the dilation operation kernel for emerging neighbor regions before removing unipolar regions from the original 23 to 19. This adjustment helps maintain consistency in detections between MDI and HMI maps and also ensures that ARs are separated as much as possible.
+
 Additionally, we provide two functions in the file to process a map: **Get_ARi**, which generates the detection image, and **Get_ARP**, which returns the parameters of the detected ARs.
 
 **ARparameters.py** describes the methods to calculate the parameters of each detected AR, such as area, flux, and dipole fields.
