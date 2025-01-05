@@ -266,9 +266,10 @@ def RemoveRepeatAR(img, module4, img_last, img_next, rt1, rt2):
     for i in range(np.max(label4_rot2)):
         # label starts from 1 and i starts from 0
         index = (label4_rot2 == i+1).astype('uint8')
-        # 由于演化，后续浮现的活动区范围要比较差自转得到的大，尝试增大范围，膨胀label4_rot2
+        # The range of the AR observed again is larger than that obtained by rotation.
+        # Attempt to increase the range: dilate label4_rot2
         index2 = cv2.dilate(index, np.ones((9, 9)))
-        # remove ARs disappear after deratation
+        # remove ARs disappear after derotation
         if np.max(index) == 1:
             index = index == 1
             new = img_rot2*index
