@@ -298,8 +298,10 @@ def RemoveRepeatAR(img, module4, img_last, img_next, rt1, rt2):
 
 def ARdetection(img_last, img_next, rt1, rt2, img_input, Kernel1, Kernel2, Thresh, Kernel3, Size, Kernel4):
     """
-    img_old  : image of the last CR
-    rt       : threshold of flux ratio of the repeat ARs
+    img_last, image from the last CR
+    img_next, image from the next CR
+    rt1: threshold of flux ratio of the repeat decayed ARs
+    rt2: threshold of flux ratio of the not-fully-emerged ARs
     img_input: input FITS file
     Kernel1  : closing operation kernel in module2
     Kernel2  : opening operation kernel in module2
@@ -444,9 +446,12 @@ def Get_ARi(File, Filetype, File_last, File_next, rt1, rt2):
     """
     # get AR detection image of File after each module
 
-    file : fits file of map
-    filetype: MDI or HMI
-    file_old: map of the last CR
+    File : fits file of map
+    Filetype: MDI or HMI
+    File_old: map of the last CR
+    File_next, image from the next CR
+    rt1: threshold of flux ratio of the repeat decayed ARs
+    rt2: threshold of flux ratio of the not-fully-emerged ARs
     """
     img_input = Get_data(File)
     img_last = Get_data(File_last)
@@ -488,9 +493,13 @@ def Get_ARP(File, Filetype, File_last, File_next, rt1, rt2, lamr):
     """
     get AR parameters from synoptic magnetograms
 
-    file : fits file of map
-    filetype: MDI or HMI
-    file_old: map of the last CR
+    File : fits file of map
+    Filetype: MDI or HMI
+    File_old: map of the last CR
+    File_next, image from the next CR
+    rt1: threshold of flux ratio of the repeat decayed ARs
+    rt2: threshold of flux ratio of the not-fully-emerged ARs
+    lamr: the value of the dynamo effectivity range
 
     Returns：param (17*num)(num: AR number in this CR)
 
