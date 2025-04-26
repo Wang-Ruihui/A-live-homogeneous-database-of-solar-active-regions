@@ -1,8 +1,8 @@
-# An Active Region Database for Solar Cycle Variability and Prediction 
+# Active Region database for Influence on Solar cycle Evolution (ARISE)
 # (formerly a live homogeneous database of solar active regions)
 
 # Overview
-This is `An Active Region Database for Solar Cycle Variability and Prediction', developed by **Ruihui Wang, Jie Jiang, and Yukun Luo**, Beihang University, China. 
+This is the `**A**ctive **R**egion database for **I**nfluence on **S**olar cycle **E**volution (ARISE)', developed by **Ruihui Wang, Jie Jiang, and Yukun Luo**, Beihang University, China. 
 
 We offer two versions of the database: one includes all detected ARs (**database_allAR.xlsx**), and the other excludes repeat ARs (**database_remove_repeat_AR.xlsx**). Both versions contain the same parameters, including basic parameters and those related to solar cycle variability (dipole fields). However, caution should be taken when using the dipole field data from _database_allAR.xlsx_, as some long-lived ARs are recorded multiple times.
 
