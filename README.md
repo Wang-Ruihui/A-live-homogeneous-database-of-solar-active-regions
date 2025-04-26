@@ -22,7 +22,7 @@ These Python codes include the automatic detection method for solar active regio
 To use the codes, you first need to download MDI and HMI synoptic magnetograms (_mdi.synoptic_Mr_96m and hmi.Synoptic_Mr_720s_) from JSOC. The radial magnetograms are used in our code, but line-of-sight (LOS) magnetograms can also be processed with appropriate adjustments to the detection parameters
 
 
-**ARdetection.py** contains the AR detection methods, including the original detection method (**ARdetection_org**) and the updated method with repeat-AR-removal (**ARdetection**). Our detection processmethod consists of five modules: adaptive intensity threshold segmentation, morphological closing and opening operations, region growing, small region removal, and unipolar region removal. The repeat-AR-removal module is integrated between the small region removal and unipolar region removal steps in the **ARdetection** function.
+**ARdetection.py** contains the AR detection methods, including the original detection method (**ARdetection_org**) and the updated method with repeat-AR-removal (**ARdetection**). Our detection process consists of five modules: adaptive intensity threshold segmentation, morphological closing and opening operations, region growing, small region removal, and unipolar region removal. The repeat-AR-removal module is integrated between the small region removal and unipolar region removal steps in the **ARdetection** function.
 
 We change the dilation operation kernel for emerging neighbor regions before removing unipolar regions from the original 23 to 19. This adjustment helps maintain consistency in detections between MDI and HMI maps and also ensures that ARs are separated as much as possible.
 
