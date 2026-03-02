@@ -1,106 +1,102 @@
 # -*- coding: utf-8 -*-
 """
-batch process the magnetogram
+Batch process magnetograms to extract Active Region (AR) parameters.
 
-生成活动区参数矩阵，保存到文件File2
+This script reads synoptic magnetogram FITS files, detects active regions,
+extracts their physical parameters, and saves them into a NumPy array and CSV file.
 """
 
+import os
+import re
 import numpy as np
 from astropy.io import fits
-from skimage import measure
-import os
-from ARdetection import Get_ARP, Get_ARi
-
-# ------------------------------------------------------------------------------
+from ARdetection import Get_ARP
 
 
-def data_missing(file):
+def has_missing_data(file_path):
     """
-    Determine whether the file is missing data
-    if there is nan around equator of the map, the file is missing data
+    Check if the magnetogram has missing data by inspecting NaN values near the equator.
 
-    Parameters
-    ----------
-    file : filepath of fits file
+    Parameters:
+        file_path (str): Path to the FITS file.
 
-    Returns
-    -------
-    bool
-        True for missing，False for no missing
+    Returns:
+        bool: True if missing data is detected, False otherwise.
     """
-    input_file = fits.open(file)
-    input_img = input_file[0].data
-    input_file.close()
+    try:
+        with fits.open(file_path) as hdul:
+            img_data = hdul[0].data
+        # Check for NaN values in the equatorial region (row 720)
+        nan_count = np.isnan(img_data[720, :]).sum()
+        return nan_count > 0
+    except Exception as e:
+        print(f"[ERROR] Failed to read file {file_path}: {e}")
+        return True
 
-    num_nan = len(np.where(np.isnan(input_img[720, :]))[0])
 
-    if num_nan >= 1:
-        flag = True
+def get_cr_number_from_filename(filename):
+    """
+    Extract Carrington Rotation (CR) number from filename using regex.
+
+    CR number is a 4-digit number in the filename.
+    """
+    match = re.search(r'(\d{4})', os.path.basename(filename))
+    return int(match.group(1)) if match else None
+
+
+def main():
+    """
+    Main function to batch process magnetogram files and extract AR parameters.
+    """
+
+    # Configuration
+    output_file_npy = r'D:\python program\活动区识别\databseGithub\2025.10.8\database_allARs(lamr6.44)2.npy'
+    output_file_csv = r'D:\python program\活动区识别\databseGithub\2025.10.8\database_allARs(lamr6.44)2.csv'
+
+    lamr = 6.44     # Parameter used in AR detection algorithm
+
+    crs = 1909
+    cre = 2303
+
+    # wheter remove repeat ARs
+    RemoveRepeat = True
+    print('RemoveRepeat is', RemoveRepeat)
+
+    # List of files with missing data
+    missing_data_files = []
+    ar_param_list = []
+
+    for cr in range(crs, cre+1):
+        # Extract AR parameters
+        try:
+            params = Get_ARP(cr, lamr, allregion=False,
+                             RemoveRepeat=RemoveRepeat)
+            if params.size > 0:
+                ar_param_list.append(params)
+        except Exception as e:
+            print(f"[ERROR] Error processing file {cr}: {e}")
+
+        print(f"CR {cr} processed.")
+
+    # Combine all AR parameter arrays horizontally
+    if ar_param_list:
+        ar_params_array = np.hstack(ar_param_list)
+
     else:
-        flag = False
+        print("[WARNING] No AR parameters extracted.")
+        return
 
-    return flag
+    # Save results
+    np.save(output_file_npy, ar_params_array)
+    np.savetxt(output_file_csv, ar_params_array.T, delimiter=',')
+    print("Active Region parameters saved successfully.")
+
+    # Output warning for files with missing data
+    if missing_data_files:
+        print("\n--- WARNING: Files with missing data ---")
+        for f in missing_data_files:
+            print(f"- {f}")
 
 
-# --------------------------------------------------------------------------------
-if __name__ == '__main__':
-
-    data_missing_file = []
-
-    # batch process the 23 and 24 solar cycle magneticgram
-    Filepath = 'D:\\python program\\活动区识别\\SynopMr'
-    lists1 = os.listdir(Filepath)
-
-    AR_parameters = np.zeros((17, 1))
-    file_last = 'D:/python program/活动区识别/SynopMr/SynopMr 1MDI/mdi.synoptic_Mr_96m.2077.data.fits'
-    cr = 1909
-    rt1 = 0.85
-    rt2 = 1
-    lamr = 7.17
-
-    for j in range(len(lists1)):
-        path = lists1[j]
-        filepath_new = Filepath+'\\'+path  # folder of each instrument
-        lists2 = os.listdir(filepath_new)
-
-        fileNum = len(lists2)
-        print(fileNum)
-
-        for i in range(fileNum):
-            filename1 = lists2[i]
-            file = os.path.join(filepath_new, filename1)  # file of each map
-            if i+1 < fileNum:
-                file_next = os.path.join(filepath_new, lists2[i+1])
-            elif j == 0:
-                file_next = 'D:/python program/活动区识别/SynopMr/SynopMr HMI/hmi.Synoptic_Mr_720s.2097.synopMr.fits'
-            else:
-                file_next = 'D:/python program/活动区识别/SynopMr/SynopMr 1MDI/mdi.synoptic_Mr_96m.2077.data.fits'
-            # determine whether the file is missing data. if true, label
-            if data_missing(file):
-                data_missing_file.append(filename1)
-
-            # determine the file type, MDI or HMI
-            if len(filename1) > 35:
-                filetype = 'HMI'
-            else:
-                filetype = 'MDI'
-
-            parameters = Get_ARP(file, filetype, file_last,
-                                 file_next, rt1, rt2, lamr)
-            AR_parameters = np.concatenate((AR_parameters, parameters), axis=1)
-
-            cr += 1
-            if cr == 1938:
-                cr = 1941
-
-            file_last = file
-
-            print(filename1+' done')
-            print('      ')
-
-        print(path.split()[1] + ' magnetogram done')
-
-    # save the data
-    AR_parameters = np.delete(AR_parameters, 0, axis=1)  # delete the first col
-    File2 = 'D:/python program/活动区识别/result data/Remove12/AR_Parameters_v1(lamr7.17,BL_yeates).npy'
-    np.save(File2, AR_parameters)
+if __name__ == "__main__":
+    main()

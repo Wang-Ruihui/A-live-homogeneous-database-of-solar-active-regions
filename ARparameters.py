@@ -1,599 +1,383 @@
 # -*- coding: utf-8 -*-
 """
-Getting the parameters of active region
-
+Compute physical parameters of detected Active Regions (ARs)
 """
+
 import numpy as np
 from skimage import measure
 from math import erf
-import cv2 as cv
-# ---------------------------------------------------------------------------------
-rs = 695.5  # 单位：Mm
-microH = 2*np.pi*rs**2 / (10**6)  # 太阳半球面积的百万分之一,micro hemisphere
-# hign resolution synoptic magnetogram
-dx = 360/3600  # degree/pixel,综合磁图上每个像素x方向对映的经度
-dy = 2/1440  # 综合磁图上每个像素y方向对映的正弦纬度
 
-global pixel_area_Mm, pixel_area_mH
-pixel_area_Mm = (dx/180*np.pi)*dy*rs**2  # 单位：Mm^2
-pixel_area_mH = pixel_area_Mm / microH  # 单位：太阳半球面积的百万分之一
+# Solar constants
+rs = 695.5  # Solar radius in Mm
+microH = 2 * np.pi * rs**2 / 1e6  # One-millionth of a solar hemisphere area
+
+# Synoptic magnetogram resolution
+dx_deg_per_pixel = 360 / 3600  # Degrees per pixel in longitude
+dy_sinlat_per_pixel = 2 / 1440  # Delta(sin(latitude)) per pixel in latitude
+
+# Pixel area in physical units
+pixel_area_Mm2 = (dx_deg_per_pixel / 180 * np.pi) * \
+    dy_sinlat_per_pixel * rs**2  # Mm²
+pixel_area_microH = pixel_area_Mm2 / microH  # In units of 1e-6 solar hemisphere
 
 
 def GetCentroid(AR, locat):
     """
+    Compute the flux-weighted centroid of an active region.
+
     Parameters
     ----------
     AR : array
-        每个活动区所有像素磁场值，所有正磁场值或所有负磁场值
-    locat : array
-        每个活动区对应输入的AR类型的像素的坐标
+        Magnetic field values (positive or negative) of pixels belonging to one polarity of an AR.
+    locat : tuple of arrays
+        (row_indices, col_indices) of the AR pixels in the full synoptic map.
 
     Returns
     -------
-    flux weighted center
-    lat : 纬度
-    lon : 经度
-
+    lat : float
+        Latitude of the centroid in degrees.
+    lon : float
+        Longitude of the centroid in degrees.
     """
-    rowN = 1248  # 修改后的综合磁图的总行数
-    colN = 3600  # 综合磁图总列数
+    rowN, colN = 1440, 3600  # Image dimensions
 
-    '''
-    #几何中心
-    row = np.average(locat[0])
-    col = np.average(locat[1])
+    # Flux-weighted centroid in pixel coordinates
+    row = np.sum(AR * locat[0]) / np.sum(AR)
+    col = np.sum(AR * locat[1]) / np.sum(AR)
 
-    '''
-    # 重心的矩阵下标,以磁通量为权重
-    row = np.sum(AR*locat[0])/np.sum(AR)
-    col = np.sum(AR*locat[1])/np.sum(AR)
-
-    # 重心的经纬度
-    # 纬度对应的正弦值，没有高纬地区，磁图对应纬度范围+-60
-    sincita = (row+0.5) / rowN * 3**0.5 - 3**0.5/2
-    lat = np.arcsin(sincita) * 180 / np.pi
-    lon = (col+0.5) / colN * 360
+    # Convert to latitude and longitude
+    sin_lat = (row + 0.5) / rowN * 2 - 1
+    lat = np.arcsin(sin_lat) * 180 / np.pi
+    lon = (col + 0.5) / colN * 360
 
     return lat, lon
 
 
 def ARLocat(img_label, img_input):
-    '''
-    img_input : array
-        输入的原图像
-    img_label : array
-        活动区标记后的图像
+    """
+    Compute centroid positions for positive, negative, and total flux of each AR.
+
+    Parameters
+    ----------
+    img_label : 2D array
+        Labeled image where each AR has a unique integer label.
+    img_input : 2D array
+        Original synoptic magnetogram.
 
     Returns
     -------
-    location : array
-        所有活动区的经纬度位置
-        每一列表示一个活动区数据；
-        6行
-        0，1行表示活动区正极区经纬度位置(0纬度，1经度)，
-        2和3表示活动区负极区经纬度位置，
-        4和5表示活动区整体经纬度位置；
-        每一部分都是第一行表示活动区纬度，第二行表示活动区经度
+    location : 2D array of shape (6, N_ARs)
+        Each column corresponds to one AR:
+        - Rows 0,1: latitude and longitude of positive polarity centroid
+        - Rows 2,3: latitude and longitude of negative polarity centroid
+        - Rows 4,5: latitude and longitude of total (unsigned) flux centroid
+    """
+    n_ars = int(np.max(img_label))
+    location = np.zeros((6, n_ars))
 
-    '''
-    location = np.zeros((6, np.max(img_label)))
-    for i in range(1, np.max(img_label)+1):
-        locat = np.where(img_label == i)
-        AR = img_input[locat]
-        pos = AR[np.where(AR > 0)]
-        neg = AR[np.where(AR < 0)]
+    for i in range(1, n_ars + 1):
+        mask = (img_label == i)
+        AR = img_input[mask]
+        pos_flux = AR[AR > 0]
+        neg_flux = AR[AR < 0]
 
-        # 活动区整体位置
-        location[4, i-1], location[5, i-1] = GetCentroid(np.abs(AR), locat)
+        # Total flux centroid
+        location[4, i-1], location[5, i -
+                                   1] = GetCentroid(np.abs(AR), np.where(mask))
 
-        # 获取活动区正负极像素的下标
-        '''
-        AR2 = np.zeros(img_label.shape)
-        AR2[np.where(img_label == i)] = 1
-        AR2 = AR2 * img_input
-        locat_pos = np.where(AR2 > 0)
-        locat_neg = np.where(AR2 < 0)
-        '''
-        locat_pos = np.where((img_input > 0) * (img_label == i))
-        locat_neg = np.where((img_input < 0) * (img_label == i))
+        # Polarity-specific centroids
+        pos_mask = (img_input > 0) & mask
+        neg_mask = (img_input < 0) & mask
 
-        location[0, i-1], location[1, i-1] = GetCentroid(pos, locat_pos)
-        location[2, i-1], location[3, i-1] = GetCentroid(abs(neg), locat_neg)
+        if pos_flux.size > 0:
+            location[0, i-1], location[1, i -
+                                       1] = GetCentroid(pos_flux, np.where(pos_mask))
+        if neg_flux.size > 0:
+            location[2, i-1], location[3, i -
+                                       1] = GetCentroid(np.abs(neg_flux), np.where(neg_mask))
 
     return location
 
 
 def Distance(loc):
     """
-    求解球面两点的球心角
+    Compute great-circle angular distance between two points on a sphere.
 
     Parameters
     ----------
-    loc : [lat0, lon0, lat1, lon1] ,(4,)
-        两点的纬度、经度坐标 ,单位：度（°）
+    loc : array-like, shape (4,)
+        [lat0, lon0, lat1, lon1] in degrees.
 
     Returns
     -------
     delta : float
-        球面两点的球心角, 单位：度（°）
-
+        Angular separation in degrees.
     """
-    # np.cos,sin 使用弧度制，输入输出的角度使用°，要变换单位
-
-    # 太阳半径
-    # rs = 695.5  #单位：Mm
-    lat0, lon0, lat1, lon1 = loc / 180 * np.pi
-    # 球面两点距离公式 D=R*arccos(cos(lat0)*cos(lat1)*cos(lon1-lon0)
-    #                    +sin(lat1)*sin(lat0))
-    delta = np.arccos(np.cos(lat0) * np.cos(lat1) * np.cos(lon1 - lon0)
-                      + np.sin(lat1)*np.sin(lat0))
-    delta = delta / np.pi * 180
-
-    return delta
+    lat0, lon0, lat1, lon1 = np.deg2rad(loc)
+    cos_delta = (
+        np.cos(lat0) * np.cos(lat1) * np.cos(lon1 - lon0) +
+        np.sin(lat0) * np.sin(lat1)
+    )
+    # Clamp to [-1, 1] to avoid numerical errors
+    cos_delta = np.clip(cos_delta, -1.0, 1.0)
+    delta = np.arccos(cos_delta)
+    return np.rad2deg(delta)
 
 
 def Tilt(loc):
     """
-    求解活动区两级倾角
+    Compute tilt angle of an active region bipole.
 
     Parameters
     ----------
-    loc : [lat0, lon0, lat1, lon1] ,(4,)
-        两极的纬度、经度坐标 ,单位：度（°）
+    loc : array-like, shape (6,)
+        [lat_pos, lon_pos, lat_neg, lon_neg, lat_center, lon_center] in degrees.
 
     Returns
     -------
     tilt : float
-        球面两点的倾角, 单位：度（°）
-
+        Tilt angle in degrees (Joy's law convention).
     """
-    # np.cos,sin 使用弧度制，输入输出的角度使用°，要变换单位
-
-    # 太阳半径
-    # rs = 695.5  #单位：Mm
-    lat0, lon0, lat1, lon1, latw, lonw = loc / 180 * np.pi
-    # 球面两点距离公式 D=R*arccos(cos(lat0)*cos(lat1)*cos(lon1-lon0)
-    #                    +sin(lat1)*sin(lat0))
-    tilt = np.arctan(-(lat0 - lat1)/((lon0-lon1)*np.cos(latw)))
-    tilt = tilt / np.pi * 180
-
-    return tilt
+    lat0, lon0, lat1, lon1, latw, lonw = np.deg2rad(loc)
+    dlat = lat0 - lat1
+    dlon = (lon0 - lon1) * np.cos(latw)
+    tilt = np.arctan2(-dlat, dlon)  # Use arctan2 for correct quadrant
+    return np.rad2deg(tilt)
 
 
 def ARArea(img_label, img_input):
-    '''
-    Parameters
-    ----------
-    img_label : array
-        img labeled with measure.label
-    input_file : opened fits file
-         magnetogram file
+    """
+    Compute areas of positive and negative polarities for each AR.
 
     Returns
     -------
-    area : array
-        two plarity area of each AR in the magnetogram; pos,neg
-    '''
-    # pixel_area_Mm = 1.172570975148625 Mm^2
-    # pixel_area_maH = 0.38580246913580246
-
-    area = np.zeros((2, np.max(img_label)))
-    # 面积计算，算算
+    area : array, shape (2, N_ARs)
+        Row 0: positive polarity area (in micro-hemispheres)
+        Row 1: negative polarity area
     """
-    properties = measure.regionprops(img_label)
-    for i in range(len(properties)):
-        prop = properties[i]
-        area[i] = prop.area * pixel_area_mH
-    """
+    n_ars = int(np.max(img_label))
+    area = np.zeros((2, n_ars))
 
-    for i in range(np.max(img_label)):
-        ar = img_input*(img_label == (i+1))
-        arn = ar[ar < 0]
-        arp = ar[ar > 0]
-        # area of postive polarity
-        area[0, i] = len(arp)*pixel_area_mH
-        # area of negative polarity
-        area[1, i] = len(arn)*pixel_area_mH
+    for i in range(n_ars):
+        ar = img_input * (img_label == (i + 1))
+        area[0, i] = np.sum(ar > 0) * pixel_area_microH  # Positive area
+        area[1, i] = np.sum(ar < 0) * pixel_area_microH  # Negative area
 
     return area
 
 
 def ARFlux(img_label, img_input):
-    '''
-    Parameters
-    ----------
-    img_label : array
-        活动区标记后的图像矩阵
-    img_input : array
-        处理后的图像输入矩阵，1248*3600
+    """
+    Compute magnetic flux of each polarity for all ARs.
 
     Returns
     -------
-    flux : array
-        磁通量矩阵，第一行为正磁通量，第二行为负磁通量；每一列为一个活动区
+    flux : array, shape (2, N_ARs)
+        Magnetic flux in Maxwells (Mx).
+        Row 0: positive flux, Row 1: negative flux.
+    """
+    n_ars = int(np.max(img_label))
+    flux = np.zeros((2, n_ars))
 
-    '''
-    # 单位：Mx 麦克斯韦
-    flux = np.zeros((2, np.max(img_label)))
-
-    for i in range(1, np.max(img_label)+1):
-        AR = img_input[np.where(img_label == i)]
-        pos = AR[np.where(AR > 0)]
-        neg = AR[np.where(AR < 0)]
-        # 1 Gauss*Mm^2 = 10^16 Mx
-        flux[0, i-1] = np.sum(pos) * pixel_area_Mm * 10**16  # 正磁通量
-        flux[1, i-1] = np.sum(neg) * pixel_area_Mm * 10**16  # 负磁通量
+    for i in range(1, n_ars + 1):
+        AR = img_input[img_label == i]
+        pos = AR[AR > 0]
+        neg = AR[AR < 0]
+        # 1 Gauss * Mm² = 1e16 Mx
+        flux[0, i-1] = np.sum(pos) * pixel_area_Mm2 * 1e16
+        flux[1, i-1] = np.sum(neg) * pixel_area_Mm2 * 1e16
 
     return flux
 
 
 def ARBmax(img_label, img_input):
-    '''
-    get the flux of two polarities of AR;   unit：Mx
-    '''
-    Bmax = np.zeros(np.max(img_label))
+    """
+    Compute maximum field strength within each AR.
 
-    for i in range(1, np.max(img_label)+1):
-        AR = img_input[np.where(img_label == i)]
-        Bmax[i-1] = np.max(abs(AR))
+    Returns
+    -------
+    Bmax : array, shape (N_ARs,)
+        Peak |B| in Gauss.
+    """
+    n_ars = int(np.max(img_label))
+    Bmax = np.zeros(n_ars)
+
+    for i in range(1, n_ars + 1):
+        AR = img_input[img_label == i]
+        Bmax[i-1] = np.max(np.abs(AR))
 
     return Bmax
 
 
 def FDF(img_label, img_input, lamr):
     """
-    calculate the final dipole magnetic field of ARs
+    Compute the Final Dipole Field (FDF) contribution from each AR (Wang 2021).
 
     Parameters
     ----------
-    img_label : array
-        label of detection results
-    img_input : array
-        original image 
+    lamr : float
+        Supergranular diffusion scale (degrees).
 
     Returns
     -------
-    final dipole field of all detected ARs
-
+    fdf : array
+        FDF values for all ARs.
     """
-
-    # AR number
-    N = np.max(img_label)
-
-    M1, N1 = np.shape(img_label)
-
-    # parameters
-    dx = (360/3600)/180*np.pi
-    dy = 2/1440
+    n_ars, (M1, N1) = int(np.max(img_label)), img_label.shape
+    dx = np.deg2rad(dx_deg_per_pixel)
+    dy = dy_sinlat_per_pixel
     A = 0.21
-    lamr = lamr/180*np.pi  # change unit from degree to rad
+    lamr_rad = np.deg2rad(lamr)
 
-    # calculate the FDF based on Wang, 2021
     fdf = []
-    for i in range(N):
-        ar = np.zeros((M1, N1))
-        index = (img_label == i+1)
-        ar[index] = img_input[index]
+    for i in range(n_ars):
+        ar = np.zeros_like(img_input)
+        mask = (img_label == i + 1)
+        ar[mask] = img_input[mask]
 
-        # balance the flux
-        # Wang 2021
-        # pos = ar[ar > 0]
-        # neg = ar[ar < 0]
-        # p = np.sum(pos)
-        # n = np.sum(abs(neg))
-        # if p > n:
-        #     index1 = (img_label == i+1)*(img_input < 0)
-        #     ar[index1] = ar[index1]*p/n
-        # else:
-        #     index1 = (img_label == i+1)*(img_input > 0)
-        #     ar[index1] = ar[index1]*n/p
-
-        # yeates 2020
+        # Flux balancing (Yeates 2020)
         pos = ar[ar > 0]
         neg = ar[ar < 0]
-        p = np.sum(pos)
-        n = np.sum(abs(neg))
-        a = (p+n)/(2*p)
-        b = (p+n)/(2*n)
-        ar[ar > 0] = ar[ar > 0]*a
-        ar[ar < 0] = ar[ar < 0]*b
+        p, n = np.sum(pos), np.sum(np.abs(neg))
+        if p > 0:
+            ar[ar > 0] *= (p + n) / (2 * p)
+        if n > 0:
+            ar[ar < 0] *= (p + n) / (2 * n)
 
-        fdf1 = 0
+        fdf_val = 0.0
         for j in range(M1):
-            lat = np.arcsin((j+0.5)/M1*3**0.5 - 0.5*3**0.5)
-            fdf1 += np.sum(ar[j, :]) * erf(lat/(lamr*2**0.5))
-        fdf1 = A*fdf1*dx*dy
-        fdf.append(fdf1)
+            lat = np.arcsin((j + 0.5) / M1 * 2 - 1)
+            fdf_val += np.sum(ar[j, :]) * erf(lat / (lamr_rad * np.sqrt(2)))
+        fdf_val = A * fdf_val * dx * dy
+        fdf.append(fdf_val)
 
     return np.array(fdf)
 
 
 def IDF(img_label, img_input):
     """
-    calculate the final dipole magnetic field of ARs
-
-    Parameters
-    ----------
-    img_label : array
-        label of detection results
-    img_input : array
-        original image 
+    Compute the Initial Dipole Field (IDF) contribution from each AR.
 
     Returns
     -------
-    final dipole field of all detected ARs
-
+    idf : array
+        IDF values for all ARs.
     """
+    n_ars, (M1, N1) = int(np.max(img_label)), img_label.shape
+    dx = np.deg2rad(dx_deg_per_pixel)
+    dy = dy_sinlat_per_pixel
 
-    # AR number
-    N = np.max(img_label)
-
-    M1, N1 = np.shape(img_label)
-
-    # parameters
-    dy = 2/1440
-    dx = (360/3600)/180*np.pi
-
-    # calculate the FDF based on Wang, 2021
     idf = []
-    for i in range(N):
-        ar = np.zeros((M1, N1))
-        index = (img_label == i+1)
-        ar[index] = img_input[index]
+    for i in range(n_ars):
+        ar = np.zeros_like(img_input)
+        mask = (img_label == i + 1)
+        ar[mask] = img_input[mask]
 
-        # balance the flux
-        # # wang 2020
-        # pos = ar[ar > 0]
-        # neg = ar[ar < 0]
-        # p = np.sum(pos)
-        # n = np.sum(abs(neg))
-        # if p > n:
-        #     index1 = (img_label == i+1)*(img_input < 0)
-        #     ar[index1] = ar[index1]*p/n
-        # else:
-        #     index1 = (img_label == i+1)*(img_input > 0)
-        #     ar[index1] = ar[index1]*n/p
-
-        # yeates 2020
+        # Flux balancing (Yeates 2020)
         pos = ar[ar > 0]
         neg = ar[ar < 0]
-        p = np.sum(pos)
-        n = np.sum(abs(neg))
-        a = (p+n)/(2*p)
-        b = (p+n)/(2*n)
-        ar[ar > 0] = ar[ar > 0]*a
-        ar[ar < 0] = ar[ar < 0]*b
+        p, n = np.sum(pos), np.sum(np.abs(neg))
+        if p > 0:
+            ar[ar > 0] *= (p + n) / (2 * p)
+        if n > 0:
+            ar[ar < 0] *= (p + n) / (2 * n)
 
-        idf1 = 0
+        idf_val = 0.0
         for j in range(M1):
-            sinlat = (j+0.5)/M1*3**0.5 - 0.5*3**0.5
-            idf1 += np.sum(ar[j, :])*sinlat
-
-        idf1 = 3/(4*np.pi)*idf1*dy*dx
-        idf.append(idf1)
-
-    return np.array(idf)
-
-
-def FDFsm(img_label, img_input, lamr):
-    """
-    calculate the final dipole magnetic field of ARs
-
-    Parameters
-    ----------
-    img_label : array
-        label of detection results
-    img_input : array
-        original image 
-
-    Returns
-    -------
-    final dipole field of all detected ARs
-
-    """
-
-    # AR number
-    N = np.max(img_label)
-
-    M1, N1 = np.shape(img_label)
-
-    # size of small picture
-    M2 = 156
-    N2 = 360
-    # parameters
-    dx = (360/360)/180*np.pi
-    dy = 2/180
-    A = 0.21
-    lamr = lamr/180*np.pi  # change unit from degree to rad
-
-    # calculate the FDF based on Wang, 2021
-    fdf = []
-    for i in range(N):
-        ar = np.zeros((M1, N1))
-        index = (img_label == i+1)
-        ar[index] = img_input[index]
-
-        ar_sml = cv.resize(ar, (N2, M2), interpolation=cv.INTER_LINEAR)
-        # # balance the flux
-        # # wang 2021
-        # pos = ar_sml[ar_sml > 0]
-        # neg = ar_sml[ar_sml < 0]
-        # p = np.sum(pos)
-        # n = np.sum(abs(neg))
-        # if p > n:
-        #     index1 = ar_sml < 0
-        #     ar_sml[index1] = ar_sml[index1]*p/n
-        # else:
-        #     index1 = ar_sml > 0
-        #     ar_sml[index1] = ar_sml[index1]*n/p
-
-        # yeates 2020
-        indexp = ar_sml > 0
-        indexn = ar_sml < 0
-        pos = ar_sml[indexp]
-        neg = ar_sml[indexn]
-        p = np.sum(pos)
-        n = np.sum(abs(neg))
-        a = (p+n)/(2*p)
-        b = (p+n)/(2*n)
-        ar_sml[indexp] = ar_sml[indexp]*a
-        ar_sml[indexn] = ar_sml[indexn]*b
-
-        fdf1 = 0
-        for j in range(M2):
-            lat = np.arcsin((j+0.5)/M2*3**0.5 - 0.5*3**0.5)
-            fdf1 += np.sum(ar_sml[j, :]) * erf(lat/(lamr*2**0.5))
-        fdf1 = A*fdf1*dx*dy
-        fdf.append(fdf1)
-
-    return np.array(fdf)
-
-
-def IDFsm(img_label, img_input):
-    """
-    calculate the final dipole magnetic field of ARs
-
-    Parameters
-    ----------
-    img_label : array
-        label of detection results
-    img_input : array
-        original image 
-
-    Returns
-    -------
-    final dipole field of all detected ARs
-
-    """
-
-    # AR number
-    N = np.max(img_label)
-
-    M1, N1 = np.shape(img_label)
-
-    # size of small picture
-    M2 = 156
-    N2 = 360
-    # parameters
-    dx = (360/360)/180*np.pi
-    dy = 2/180
-
-    # calculate the FDF based on Wang, 2021
-    idf = []
-    for i in range(N):
-        ar = np.zeros((M1, N1))
-        index = (img_label == i+1)
-        ar[index] = img_input[index]
-
-        # reduce the size
-        ar_sml = cv.resize(ar, (N2, M2), interpolation=cv.INTER_LINEAR)
-
-        # # balance the flux
-        # wang 2020
-        # pos = ar_sml[ar_sml > 0]
-        # neg = ar_sml[ar_sml < 0]
-        # p = np.sum(pos)
-        # n = np.sum(abs(neg))
-        # if p > n:
-        #     index1 = ar_sml < 0
-        #     ar_sml[index1] = ar_sml[index1]*p/n
-        # else:
-        #     index1 = ar_sml > 0
-        #     ar_sml[index1] = ar_sml[index1]*n/p
-
-        # yeates 2020
-        pos = ar[ar > 0]
-        neg = ar[ar < 0]
-        p = np.sum(pos)
-        n = np.sum(abs(neg))
-        a = (p+n)/(2*p)
-        b = (p+n)/(2*n)
-        ar[ar > 0] = ar[ar > 0]*a
-        ar[ar < 0] = ar[ar < 0]*b
-
-        idf1 = 0
-        for j in range(M2):
-            sinlat = (j+0.5)/M2*3**0.5 - 0.5*3**0.5
-            idf1 += np.sum(ar_sml[j, :])*sinlat
-
-        idf1 = 3/(4*np.pi)*idf1*dy*dx
-        idf.append(idf1)
+            sinlat = (j + 0.5) / M1 * 2 - 1
+            idf_val += np.sum(ar[j, :]) * sinlat
+        idf_val = (3 / (4 * np.pi)) * idf_val * dy * dx
+        idf.append(idf_val)
 
     return np.array(idf)
 
 
 def FDFrs(flux, lat, sign, lamdr):
-    # sign is the sign of flux in the northern polarity
-    lat = lat*np.pi/180
+    """
+    Compute FDF using empirical scaling laws (flux-latitude relation).
+
+    Parameters
+    ----------
+    flux : array, shape (2, N_ARs)
+        Magnetic flux of both polarities.
+    lat : array, shape (N_ARs,)
+        Latitude of AR center.
+    sign : array, shape (N_ARs,)
+        Sign of northern polarity (+1 or -1).
+    lamdr : float
+        Diffusion scale in degrees.
+
+    Returns
+    -------
+    fdf_rs : array
+        FDF values.
+    """
     num = flux.shape[1]
-    flux2 = np.zeros(num)
-    for i in range(num):
-        flux2[i] = np.max(abs(flux[:, i]))
+    flux2 = np.max(np.abs(flux), axis=0)  # Use stronger polarity
 
-    # 极间距
-    # Lemerle 2015
-    #d = np.exp((0.46 + 0.42*(np.log(flux2)/np.log(10)-21))*np.log(10))
-    # ours
-    d = (flux2/(5.7e20))**(1/1.73)  # flux(d)
-    # d = (flux2/(np.exp(47.77)))**(1/1.8)  # flux(d) Cy 23
-    # d = (flux2/(np.exp(47.52)))**(1/1.83)  # flux(d) smooth map
-    # d = np.exp(0.305*np.log(flux2)-13.83)  # d(flux)
-    # yeates2020
-    #d = (flux2/(3.2e20))**(1/1.8)
-    d = d*np.pi/180
-    # 倾角
-    #tilt = 0.5*abs(lat)
-    #tilt = abs(0.42*lat+0.37)
-    tilt = abs(0.42*lat)  # cycle23, all AR,no b
-    # tilt = abs(0.41*lat)  # smooth map
-    dlat = d*np.sin(tilt)
-    # radius of the sun
-    rs = 695.5
-    idf_rs = sign*3/(4*np.pi*rs**2)*flux2*dlat*np.cos(lat)*1e-16
+    # Empirical separation-flux relation
+    d_deg = (flux2 / 5.7e20) ** (1 / 1.73)  # Separation in degrees
+    d_rad = np.deg2rad(d_deg)
 
-    lamdr = lamdr/180*np.pi
-    a = (2/np.pi)**0.5*(8/9)
-    finf = a/lamdr*np.exp(-lat**2/(2*lamdr**2))
-    fdf_rs = finf*idf_rs
+    # Tilt angle (Joy's law)
+    tilt_deg = np.abs(0.42 * lat)
+    dlat_rad = d_rad * np.sin(np.deg2rad(tilt_deg))
+
+    rs = 695.5  # Solar radius in Mm
+    lat_rad = np.deg2rad(lat)
+    idf_rs = sign * (3 / (4 * np.pi * rs**2)) * flux2 * \
+        dlat_rad * np.cos(lat_rad) * 1e-16
+
+    lamdr_rad = np.deg2rad(lamdr)
+    a = np.sqrt(2 / np.pi) * (8 / 9)
+    finf = a / lamdr_rad * np.exp(-lat_rad**2 / (2 * lamdr_rad**2))
+    fdf_rs = finf * idf_rs
 
     return fdf_rs
 
 
 def FDFBMR(flux, loc, lamdr):
-    # sign is the sign of flux in the northern polarity
+    """
+    Compute FDF using actual bipole geometry from detection.
+
+    Parameters
+    ----------
+    flux : array, shape (2, N_ARs)
+        Magnetic flux.
+    loc : array, shape (6, N_ARs)
+        AR locations from ARLocat().
+    lamdr : float
+        Base diffusion scale in degrees.
+
+    Returns
+    -------
+    idf_bmr : array
+        Initial dipole field.
+    fdf_bmr : array
+        Final dipole field.
+    """
     lat = loc[4, :]
-    lat = lat*np.pi/180
+    lat_rad = np.deg2rad(lat)
     num = flux.shape[1]
-    flux2 = np.zeros(num)
-    # # flux balance wang 2020 (increase the weak polarity)
-    # for i in range(num):
-    #     flux2[i] = np.max(abs(flux[:, i]))
 
-    # flux balance Yeates 2020 (keep the total unsigned flux)
-    for i in range(num):
-        flux2[i] = np.mean(abs(flux[:, i]))
-    '''
-    # 极间距
-    d = Distance(loc[0:4, :])
-    d = d*np.pi/180
-    # 倾角
-    tilt = abs(Tilt(loc))
-    tilt = tilt*np.pi/180
-    dlat = d*np.sin(tilt)
-    sign = np.sign(loc[0, :]-loc[2, :])
-    '''
-    dlat = (loc[0, :]-loc[2, :])*np.pi/180
+    # Use mean unsigned flux (Yeates 2020)
+    flux2 = np.mean(np.abs(flux), axis=0)
 
-    # radius of the sun
+    # Latitude separation
+    dlat_deg = loc[0, :] - loc[2, :]  # pos_lat - neg_lat
+    dlat_rad = np.deg2rad(dlat_deg)
+
     rs = 695.5
-    idf_bmr = 3/(4*np.pi*rs**2)*flux2*dlat*np.cos(lat)*1e-16
+    idf_bmr = (3 / (4 * np.pi * rs**2)) * flux2 * \
+        dlat_rad * np.cos(lat_rad) * 1e-16
 
-    d = Distance(loc[0:4, :])
+    # Effective diffusion scale
+    d_sep_deg = Distance(loc[:4, :])
+    lamdr_eff_deg = np.sqrt(lamdr**2 + (d_sep_deg / 2)**2)
+    lamdr_eff_rad = np.deg2rad(lamdr_eff_deg)
 
-    lamdr = (lamdr**2+(d/2)**2)**0.5
-    lamdr = lamdr/180*np.pi
-    a = (2/np.pi)**0.5*(8/9)
-    finf = a/lamdr*np.exp(-lat**2/(2*lamdr**2))
-    fdf_bmr = finf*idf_bmr
+    a = np.sqrt(2 / np.pi) * (8 / 9)
+    finf = a / lamdr_eff_rad * np.exp(-lat_rad**2 / (2 * lamdr_eff_rad**2))
+    fdf_bmr = finf * idf_bmr
 
     return idf_bmr, fdf_bmr
